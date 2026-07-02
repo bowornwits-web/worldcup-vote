@@ -276,16 +276,34 @@
 
     /* ── Winner Badge ── */
     .winner-badge {
-      text-align: center;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
       background: linear-gradient(135deg, rgba(255,215,0,0.15), rgba(255,215,0,0.05));
       border: 1px solid rgba(255,215,0,0.3);
       border-radius: 8px;
-      padding: 8px 14px;
+      padding: 8px 10px 8px 14px;
       font-size: 16px;
       font-weight: 700;
       color: var(--gold);
       margin-top: 12px;
     }
+    .copy-btn {
+      flex-shrink: 0;
+      background: rgba(255,215,0,0.18);
+      border: 1px solid rgba(255,215,0,0.4);
+      border-radius: 12px;
+      color: var(--gold);
+      font-family: inherit;
+      font-size: 14px;
+      font-weight: 700;
+      padding: 5px 14px;
+      cursor: pointer;
+      -webkit-tap-highlight-color: transparent;
+      transition: background 0.15s;
+    }
+    .copy-btn:active { background: rgba(255,215,0,0.35); }
 
     /* ── Voter Toggle ── */
     .voter-toggle {
@@ -656,7 +674,8 @@ function renderResultCard(r) {
 
   const winnerBadge = hasWinner ? `
     <div class="winner-badge">
-      🏆 Result: ${winnerA ? r.teamAFlag : winnerB ? r.teamBFlag : ''} ${escHtml(r.winner)}
+      <span>🏆 Result: ${winnerA ? r.teamAFlag : winnerB ? r.teamBFlag : ''} ${escHtml(r.winner)}</span>
+      <button class="copy-btn" onclick="copyWinners('${escAttr(r.matchId)}')">📋 Copy</button>
     </div>` : '';
 
   const voterRows = r.voters.map(v => {
@@ -712,6 +731,32 @@ function renderResultCard(r) {
       ${winnerBadge}
       ${voterSection}
     </div>`;
+}
+
+function copyWinners(matchId) {
+  const r = results.find(x => x.matchId === matchId);
+  if (!r || !r.winner) return;
+
+  const names = r.voters
+    .filter(v => v.team === r.winner)
+    .map(v => v.lineName)
+    .join('\n');
+
+  const flag = r.winner === r.teamA ? r.teamAFlag : r.teamBFlag;
+  const header = `🏆 ${flag} ${r.winner} voters (${r.voters.filter(v => v.team === r.winner).length})`;
+  const text = header + '\n' + names;
+
+  if (navigator.clipboard) {
+    navigator.clipboard.writeText(text).then(() => showToast('📋 Copied!'));
+  } else {
+    const el = document.createElement('textarea');
+    el.value = text;
+    document.body.appendChild(el);
+    el.select();
+    document.execCommand('copy');
+    document.body.removeChild(el);
+    showToast('📋 Copied!');
+  }
 }
 
 function toggleVoters(matchId) {
