@@ -33,6 +33,13 @@
       -webkit-font-smoothing: antialiased;
     }
 
+    /* ── Sticky Top (Header + Tab Bar) ── */
+    .sticky-top {
+      position: sticky;
+      top: 0;
+      z-index: 20;
+    }
+
     /* ── Header ── */
     .header {
       background: rgba(0,0,0,0.35);
@@ -40,9 +47,6 @@
       -webkit-backdrop-filter: blur(12px);
       padding: 14px 16px 12px;
       text-align: center;
-      position: sticky;
-      top: 0;
-      z-index: 20;
       border-bottom: 1px solid rgba(255,255,255,0.08);
     }
     .header-title {
@@ -54,6 +58,33 @@
       font-size: 11px;
       opacity: 0.6;
       margin-top: 2px;
+    }
+
+    /* ── Tab Bar ── */
+    .tab-bar {
+      display: flex;
+      background: rgba(0,0,0,0.45);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      border-bottom: 1px solid rgba(255,255,255,0.08);
+    }
+    .tab-btn {
+      flex: 1;
+      padding: 10px 8px;
+      background: none;
+      border: none;
+      border-bottom: 2.5px solid transparent;
+      color: rgba(255,255,255,0.50);
+      font-family: inherit;
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: color 0.18s, border-color 0.18s;
+      -webkit-tap-highlight-color: transparent;
+    }
+    .tab-btn.active {
+      color: var(--gold);
+      border-bottom-color: var(--gold);
     }
 
     /* ── User Card ── */
@@ -78,17 +109,35 @@
     .user-name  { font-size: 15px; font-weight: 700; }
     .user-hint  { font-size: 11px; opacity: 0.6; margin-top: 2px; }
 
-    /* ── Section Label ── */
-    .section-label {
+    /* ── Section Label Row ── */
+    .section-label-row {
+      display: flex;
+      align-items: center;
       padding: 14px 16px 6px;
+    }
+    .section-label {
+      flex: 1;
       font-size: 11px;
       font-weight: 600;
       letter-spacing: 1.2px;
       text-transform: uppercase;
       opacity: 0.5;
     }
+    .reload-btn {
+      background: rgba(255,255,255,0.08);
+      border: 1px solid rgba(255,255,255,0.12);
+      border-radius: 20px;
+      color: rgba(255,255,255,0.6);
+      font-family: inherit;
+      font-size: 12px;
+      font-weight: 600;
+      padding: 4px 12px;
+      cursor: pointer;
+      -webkit-tap-highlight-color: transparent;
+    }
+    .reload-btn:active { opacity: 0.6; }
 
-    /* ── Match Card ── */
+    /* ── Match Card (Vote Tab) ── */
     .match-card {
       background: var(--card-bg);
       border: 1px solid var(--card-border);
@@ -97,12 +146,7 @@
       padding: 14px 12px 12px;
       transition: border-color 0.2s;
     }
-    .match-card.has-vote {
-      border-color: rgba(255,215,0,0.35);
-    }
-    .match-card.inactive {
-      opacity: 0.45;
-    }
+    .match-card.has-vote { border-color: rgba(255,215,0,0.35); }
 
     .match-meta {
       text-align: center;
@@ -115,11 +159,7 @@
     }
 
     /* ── Team Buttons ── */
-    .teams-row {
-      display: flex;
-      align-items: stretch;
-      gap: 8px;
-    }
+    .teams-row { display: flex; align-items: stretch; gap: 8px; }
 
     .team-btn {
       flex: 1;
@@ -140,23 +180,15 @@
       position: relative;
       overflow: hidden;
     }
-    .team-btn:active:not(:disabled) {
-      transform: scale(0.96);
-    }
-    .team-btn:disabled {
-      cursor: not-allowed;
-    }
+    .team-btn:active:not(:disabled) { transform: scale(0.96); }
+    .team-btn:disabled { cursor: not-allowed; }
     .team-btn.voted {
       background: linear-gradient(135deg, #c8a600, #ffd700);
       border-color: var(--gold);
       color: #1a2a00;
     }
-    .team-btn.voted .team-name {
-      font-weight: 800;
-    }
-    .team-btn.other-voted {
-      opacity: 0.5;
-    }
+    .team-btn.voted .team-name { font-weight: 800; }
+    .team-btn.other-voted { opacity: 0.5; }
 
     .team-flag { font-size: 32px; line-height: 1; }
     .team-name { font-size: 13px; font-weight: 600; }
@@ -179,7 +211,6 @@
       flex-shrink: 0;
     }
 
-    /* ── Vote Status Line ── */
     .vote-hint {
       text-align: center;
       margin-top: 9px;
@@ -193,15 +224,121 @@
       font-weight: 600;
     }
 
-    /* ── Inactive Badge ── */
-    .locked-badge {
-      text-align: center;
-      margin-top: 10px;
-      padding: 6px;
-      background: rgba(0,0,0,0.2);
-      border-radius: 8px;
-      font-size: 11px;
+    /* ── Result Card (Results Tab) ── */
+    .result-card {
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: var(--radius);
+      margin: 8px 14px;
+      padding: 14px 12px 12px;
     }
+    .result-card.has-winner { border-color: rgba(255,215,0,0.35); }
+
+    .result-row {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin: 8px 0 4px;
+    }
+    .result-side {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 3px;
+      min-width: 72px;
+    }
+    .result-side .team-flag { font-size: 30px; line-height: 1; }
+    .result-side .team-name { font-size: 11px; font-weight: 600; text-align: center; }
+    .result-side .vote-count {
+      font-size: 26px;
+      font-weight: 800;
+      color: rgba(255,255,255,0.65);
+      line-height: 1;
+      margin-top: 2px;
+    }
+    .result-side.is-winner .vote-count {
+      color: var(--gold);
+      text-shadow: 0 0 16px rgba(255,215,0,0.4);
+    }
+    .result-side.is-winner .team-name { color: var(--gold); }
+
+    .bar-col { flex: 1; }
+    .bar-track {
+      height: 8px;
+      border-radius: 4px;
+      overflow: hidden;
+      background: rgba(255,255,255,0.08);
+      display: flex;
+    }
+    .bar-a { background: var(--green-light); height: 100%; transition: width 0.6s ease; }
+    .bar-b { background: #e85d5d;            height: 100%; transition: width 0.6s ease; }
+    .bar-pct { text-align: center; font-size: 10px; opacity: 0.45; margin-top: 4px; }
+
+    /* ── Winner Badge ── */
+    .winner-badge {
+      text-align: center;
+      background: linear-gradient(135deg, rgba(255,215,0,0.15), rgba(255,215,0,0.05));
+      border: 1px solid rgba(255,215,0,0.3);
+      border-radius: 8px;
+      padding: 7px 12px;
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--gold);
+      margin-top: 10px;
+    }
+
+    /* ── Voter Toggle ── */
+    .voter-toggle {
+      display: block;
+      width: 100%;
+      margin-top: 10px;
+      padding: 8px;
+      background: rgba(255,255,255,0.05);
+      border: 1px solid rgba(255,255,255,0.1);
+      border-radius: 8px;
+      color: rgba(255,255,255,0.6);
+      font-family: inherit;
+      font-size: 12px;
+      font-weight: 600;
+      text-align: center;
+      cursor: pointer;
+      -webkit-tap-highlight-color: transparent;
+    }
+    .voter-toggle:active { background: rgba(255,255,255,0.1); }
+
+    /* ── Voter List ── */
+    .voter-list {
+      margin-top: 6px;
+      background: rgba(0,0,0,0.18);
+      border-radius: 8px;
+      overflow: hidden;
+    }
+    .voter-item {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 8px 10px;
+      border-bottom: 1px solid rgba(255,255,255,0.05);
+    }
+    .voter-item:last-child { border-bottom: none; }
+    .voter-avatar {
+      width: 30px;
+      height: 30px;
+      border-radius: 50%;
+      object-fit: cover;
+      flex-shrink: 0;
+      background: rgba(255,255,255,0.1);
+    }
+    .voter-name { flex: 1; font-size: 12px; }
+    .voter-badge {
+      font-size: 11px;
+      padding: 3px 9px;
+      border-radius: 12px;
+      font-weight: 600;
+      white-space: nowrap;
+    }
+    .badge-a { background: rgba(82,183,136,0.2); color: #52b788; }
+    .badge-b { background: rgba(232,93,93,0.2);  color: #e85d5d; }
 
     /* ── Loading ── */
     .loading-wrap {
@@ -209,7 +346,7 @@
       flex-direction: column;
       align-items: center;
       justify-content: center;
-      height: 60vh;
+      height: 50vh;
       gap: 16px;
     }
     .spinner {
@@ -223,7 +360,7 @@
     .loading-text { font-size: 14px; opacity: 0.7; }
     @keyframes spin { to { transform: rotate(360deg); } }
 
-    /* ── Error ── */
+    /* ── Error / Empty ── */
     .error-box {
       background: rgba(220,50,50,0.18);
       border: 1px solid rgba(220,50,50,0.4);
@@ -234,6 +371,17 @@
     }
     .error-box h3 { font-size: 15px; margin-bottom: 6px; }
     .error-box p  { font-size: 12px; opacity: 0.7; }
+
+    .empty-box {
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: var(--radius);
+      margin: 20px 14px;
+      padding: 24px 20px;
+      text-align: center;
+    }
+    .empty-box h3 { font-size: 15px; margin-bottom: 6px; }
+    .empty-box p  { font-size: 12px; opacity: 0.6; }
 
     /* ── Toast ── */
     .toast {
@@ -254,10 +402,7 @@
       box-shadow: 0 6px 24px rgba(0,0,0,0.35);
       white-space: nowrap;
     }
-    .toast.show {
-      transform: translateX(-50%) translateY(0);
-      opacity: 1;
-    }
+    .toast.show { transform: translateX(-50%) translateY(0); opacity: 1; }
     .toast.error { background: #e74c3c; }
 
     /* ── Bottom Spacer ── */
@@ -266,10 +411,16 @@
 </head>
 <body>
 
-<!-- Header -->
-<div class="header">
-  <div class="header-title">⚽ World Cup Vote 2026</div>
-  <div class="header-sub">เลือกทีมที่คุณเชียร์ · แก้ไขได้ตลอด</div>
+<!-- Sticky Header + Tab Bar -->
+<div class="sticky-top">
+  <div class="header">
+    <div class="header-title">⚽ World Cup Vote 2026</div>
+    <div class="header-sub">เลือกทีมที่คุณเชียร์ · แก้ไขได้ตลอด</div>
+  </div>
+  <div class="tab-bar">
+    <button class="tab-btn active" id="tab-vote"    onclick="switchTab('vote')">🗳️ โหวต</button>
+    <button class="tab-btn"        id="tab-results" onclick="switchTab('results')">📊 ผลโหวต</button>
+  </div>
 </div>
 
 <!-- App Mount Point -->
@@ -287,29 +438,27 @@
 // ============================================================
 //  CONFIG — แก้ไข 2 ค่านี้หลัง setup เสร็จ
 // ============================================================
-const LIFF_ID = '2010574735-9uV6sjKF';          // เช่น 2007123456-AbCdEfGh
-const API_URL = 'https://script.google.com/macros/s/AKfycbwQlJkGT2P1MjpFLZrSTPCNV9iaONZoPu9ta1NuKa3VSLfoAcZ9GGOj0JzSkguyOJ-X/exec';  // เช่น https://script.google.com/macros/s/xxx/exec
+const LIFF_ID = '2010574735-9uV6sjKF';
+const API_URL = 'https://script.google.com/macros/s/AKfycbwQlJkGT2P1MjpFLZrSTPCNV9iaONZoPu9ta1NuKa3VSLfoAcZ9GGOj0JzSkguyOJ-X/exec';
 // ============================================================
 
-let profile = null;   // LINE user profile
-let matches = [];     // match list
-let votes   = {};     // { matchId: teamName }
+let profile        = null;
+let matches        = [];
+let votes          = {};
+let currentTab     = 'vote';
+let results        = [];
+let resultsLoading = false;
+let resultsError   = '';
 
 // ── Init ────────────────────────────────────────────────────
 
 async function init() {
   try {
     await liff.init({ liffId: LIFF_ID });
-
-    if (!liff.isLoggedIn()) {
-      liff.login();
-      return;
-    }
-
+    if (!liff.isLoggedIn()) { liff.login(); return; }
     profile = await liff.getProfile();
     await loadData();
     render();
-
   } catch (err) {
     showError('ไม่สามารถโหลดแอปได้', err.message);
   }
@@ -318,14 +467,44 @@ async function init() {
 // ── Data ────────────────────────────────────────────────────
 
 async function loadData() {
-  const url = `${API_URL}?action=getAll&userId=${encodeURIComponent(profile.userId)}`;
+  const url  = `${API_URL}?action=getAll&userId=${encodeURIComponent(profile.userId)}`;
   const res  = await fetch(url);
   const data = await res.json();
-
   if (data.error) throw new Error(data.error);
-
   matches = data.matches || [];
   votes   = data.votes   || {};
+}
+
+async function loadResults() {
+  resultsLoading = true;
+  resultsError   = '';
+  render();
+  try {
+    const res  = await fetch(`${API_URL}?action=getResults`);
+    const data = await res.json();
+    if (data.error) throw new Error(data.error);
+    results = data.results || [];
+  } catch (err) {
+    resultsError = err.message;
+  }
+  resultsLoading = false;
+}
+
+// ── Tab Switching ────────────────────────────────────────────
+
+async function switchTab(tab) {
+  currentTab = tab;
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById('tab-' + tab).classList.add('active');
+  if (tab === 'results') {
+    await loadResults();
+  }
+  render();
+}
+
+async function reloadResults() {
+  await loadResults();
+  render();
 }
 
 // ── Vote Action ─────────────────────────────────────────────
@@ -333,8 +512,6 @@ async function loadData() {
 async function vote(matchId, team) {
   const card    = document.getElementById('card-' + matchId);
   const buttons = card.querySelectorAll('.team-btn');
-
-  // Disable while saving
   buttons.forEach(b => b.disabled = true);
 
   try {
@@ -349,12 +526,10 @@ async function vote(matchId, team) {
 
     const res  = await fetch(`${API_URL}?${params}`);
     const data = await res.json();
-
     if (!data.success) throw new Error(data.error || 'บันทึกไม่สำเร็จ');
 
     votes[matchId] = team;
     updateCard(matchId);
-
     showToast(data.action === 'updated' ? '🔄 เปลี่ยนโหวตเรียบร้อย!' : '🎉 โหวตสำเร็จ!');
 
   } catch (err) {
@@ -367,49 +542,54 @@ async function vote(matchId, team) {
 
 function render() {
   const app = document.getElementById('app');
-  let html  = '';
 
-  // User card
-  html += `
+  if (!profile) {
+    app.innerHTML = '<div class="loading-wrap"><div class="spinner"></div><div class="loading-text">กำลังโหลด...</div></div>';
+    return;
+  }
+
+  let html = `
     <div class="user-card">
       <img class="user-avatar"
-           src="${profile.pictureUrl || 'https://via.placeholder.com/44'}"
+           src="${escAttr(profile.pictureUrl || 'https://via.placeholder.com/44')}"
            onerror="this.src='https://via.placeholder.com/44'">
       <div>
         <div class="user-name">${escHtml(profile.displayName)}</div>
-        <div class="user-hint">เลือกทีมได้เลย · กดซ้ำเพื่อเปลี่ยน</div>
+        <div class="user-hint">${currentTab === 'vote' ? 'เลือกทีมได้เลย · กดซ้ำเพื่อเปลี่ยน' : 'ผลการโหวตจากทุกคน'}</div>
       </div>
-    </div>
-  `;
+    </div>`;
 
-  // Match cards
-  if (matches.length === 0) {
-    html += `<div class="error-box"><h3>ยังไม่มีนัดการแข่งขัน</h3><p>ติดต่อ admin เพื่อเพิ่มข้อมูลใน Google Sheets</p></div>`;
-  } else {
-    html += `<div class="section-label">นัดการแข่งขัน</div>`;
-    for (const m of matches) {
-      html += renderMatchCard(m);
-    }
-  }
-
+  html += currentTab === 'vote' ? renderVoteTab() : renderResultsTab();
   html += '<div class="spacer"></div>';
   app.innerHTML = html;
 }
 
-function renderMatchCard(m) {
-  const voted     = votes[m.matchId];
-  const hasVote   = !!voted;
-  const votedA    = voted === m.teamA;
-  const votedB    = voted === m.teamB;
+// ── Vote Tab — แสดงเฉพาะนัดที่ isActive = TRUE ──────────────
 
-  const cardClass = !m.isActive ? 'match-card inactive'
-                  : hasVote     ? 'match-card has-vote'
-                  :               'match-card';
+function renderVoteTab() {
+  const active = matches.filter(m => m.isActive);
+
+  if (active.length === 0) {
+    return `<div class="empty-box">
+      <h3>🔒 ยังไม่มีนัดที่เปิดให้โหวต</h3>
+      <p>ดูผลโหวตนัดก่อนหน้าได้ในแท็บ ผลโหวต</p>
+    </div>`;
+  }
+
+  let html = `<div class="section-label-row"><span class="section-label">นัดการแข่งขัน</span></div>`;
+  for (const m of active) html += renderMatchCard(m);
+  return html;
+}
+
+function renderMatchCard(m) {
+  const voted   = votes[m.matchId];
+  const hasVote = !!voted;
+  const votedA  = voted === m.teamA;
+  const votedB  = voted === m.teamB;
 
   const btnA = `
     <button class="team-btn ${votedA ? 'voted' : (hasVote ? 'other-voted' : '')}"
-            onclick="vote('${m.matchId}','${escAttr(m.teamA)}')"
-            ${!m.isActive ? 'disabled' : ''}>
+            onclick="vote('${escAttr(m.matchId)}','${escAttr(m.teamA)}')">
       ${votedA ? '<span class="voted-badge">✅</span>' : ''}
       <span class="team-flag">${m.teamAFlag}</span>
       <span class="team-name">${escHtml(m.teamA)}</span>
@@ -417,27 +597,20 @@ function renderMatchCard(m) {
 
   const btnB = `
     <button class="team-btn ${votedB ? 'voted' : (hasVote ? 'other-voted' : '')}"
-            onclick="vote('${m.matchId}','${escAttr(m.teamB)}')"
-            ${!m.isActive ? 'disabled' : ''}>
+            onclick="vote('${escAttr(m.matchId)}','${escAttr(m.teamB)}')">
       ${votedB ? '<span class="voted-badge">✅</span>' : ''}
       <span class="team-flag">${m.teamBFlag}</span>
       <span class="team-name">${escHtml(m.teamB)}</span>
     </button>`;
 
-  const hint = !m.isActive
-    ? `<div class="locked-badge">🔒 ยังไม่เปิดให้โหวต</div>`
-    : hasVote
-      ? `<div class="vote-hint voted-state">✅ คุณโหวต: ${escHtml(voted)} (กดทีมอื่นเพื่อเปลี่ยน)</div>`
-      : `<div class="vote-hint">👆 กดเลือกทีมที่คุณเชียร์</div>`;
+  const hint = hasVote
+    ? `<div class="vote-hint voted-state">✅ คุณโหวต: ${escHtml(voted)} (กดทีมอื่นเพื่อเปลี่ยน)</div>`
+    : `<div class="vote-hint">👆 กดเลือกทีมที่คุณเชียร์</div>`;
 
   return `
-    <div class="${cardClass}" id="card-${m.matchId}">
+    <div class="match-card ${hasVote ? 'has-vote' : ''}" id="card-${m.matchId}">
       <div class="match-meta">${escHtml(m.label)} · ${escHtml(m.group)}</div>
-      <div class="teams-row">
-        ${btnA}
-        <div class="vs-divider">VS</div>
-        ${btnB}
-      </div>
+      <div class="teams-row">${btnA}<div class="vs-divider">VS</div>${btnB}</div>
       ${hint}
     </div>`;
 }
@@ -445,11 +618,108 @@ function renderMatchCard(m) {
 function updateCard(matchId) {
   const match = matches.find(m => m.matchId === matchId);
   if (!match) return;
-
   const card = document.getElementById('card-' + matchId);
   if (!card) return;
-
   card.outerHTML = renderMatchCard(match);
+}
+
+// ── Results Tab ──────────────────────────────────────────────
+
+function renderResultsTab() {
+  if (resultsLoading) {
+    return `<div class="loading-wrap"><div class="spinner"></div><div class="loading-text">กำลังโหลดผล...</div></div>`;
+  }
+  if (resultsError) {
+    return `<div class="error-box"><h3>⚠️ โหลดผลไม่สำเร็จ</h3><p>${escHtml(resultsError)}</p></div>`;
+  }
+  if (results.length === 0) {
+    return `<div class="empty-box"><h3>ยังไม่มีข้อมูล</h3><p>ยังไม่มีการโหวต</p></div>`;
+  }
+
+  let html = `
+    <div class="section-label-row">
+      <span class="section-label">สรุปผลการโหวต</span>
+      <button class="reload-btn" onclick="reloadResults()">🔄 รีโหลด</button>
+    </div>`;
+
+  for (const r of results) html += renderResultCard(r);
+  return html;
+}
+
+function renderResultCard(r) {
+  const total     = r.teamACount + r.teamBCount;
+  const pctA      = total ? Math.round(r.teamACount / total * 100) : 50;
+  const pctB      = 100 - pctA;
+  const hasWinner = !!r.winner;
+  const winnerA   = r.winner === r.teamA;
+  const winnerB   = r.winner === r.teamB;
+
+  const winnerBadge = hasWinner ? `
+    <div class="winner-badge">
+      🏆 ผลจริง: ${winnerA ? r.teamAFlag : winnerB ? r.teamBFlag : ''} ${escHtml(r.winner)}
+    </div>` : '';
+
+  const voterRows = r.voters.map(v => {
+    const isA = v.team === r.teamA;
+    return `
+      <div class="voter-item">
+        <img class="voter-avatar"
+             src="${escAttr(v.linePicture || '')}"
+             onerror="this.src='https://via.placeholder.com/30'">
+        <span class="voter-name">${escHtml(v.lineName)}</span>
+        <span class="voter-badge ${isA ? 'badge-a' : 'badge-b'}">${isA ? r.teamAFlag : r.teamBFlag} ${escHtml(v.team)}</span>
+      </div>`;
+  }).join('');
+
+  const voterSection = total > 0 ? `
+    <button class="voter-toggle" onclick="toggleVoters('${escAttr(r.matchId)}')">
+      <span id="chevron-${escAttr(r.matchId)}">▼</span>
+      ดูรายชื่อผู้โหวต (${total} คน)
+    </button>
+    <div class="voter-list" id="voters-${escAttr(r.matchId)}" style="display:none">
+      ${voterRows}
+    </div>`
+  : `<div class="bar-pct" style="margin-top:10px;font-size:12px;opacity:0.5">ยังไม่มีผู้โหวต</div>`;
+
+  return `
+    <div class="result-card ${hasWinner ? 'has-winner' : ''}">
+      <div class="match-meta">
+        ${escHtml(r.label)} · ${escHtml(r.group)}${!r.isActive ? ' · 🔒 ปิดแล้ว' : ''}
+      </div>
+
+      <div class="result-row">
+        <div class="result-side ${winnerA ? 'is-winner' : ''}">
+          <span class="team-flag">${r.teamAFlag}</span>
+          <span class="team-name">${escHtml(r.teamA)}</span>
+          <span class="vote-count">${r.teamACount}</span>
+        </div>
+
+        <div class="bar-col">
+          <div class="bar-track">
+            <div class="bar-a" style="width:${pctA}%"></div>
+            <div class="bar-b" style="width:${pctB}%"></div>
+          </div>
+          <div class="bar-pct">${pctA}% · ${pctB}%</div>
+        </div>
+
+        <div class="result-side ${winnerB ? 'is-winner' : ''}">
+          <span class="team-flag">${r.teamBFlag}</span>
+          <span class="team-name">${escHtml(r.teamB)}</span>
+          <span class="vote-count">${r.teamBCount}</span>
+        </div>
+      </div>
+
+      ${winnerBadge}
+      ${voterSection}
+    </div>`;
+}
+
+function toggleVoters(matchId) {
+  const el   = document.getElementById('voters-' + matchId);
+  const icon = document.getElementById('chevron-' + matchId);
+  const open = el.style.display !== 'none';
+  el.style.display = open ? 'none' : 'block';
+  icon.textContent  = open ? '▼' : '▲';
 }
 
 // ── Utilities ────────────────────────────────────────────────
