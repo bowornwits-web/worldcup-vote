@@ -1,0 +1,489 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+  <meta name="theme-color" content="#1a472a">
+  <title>⚽ World Cup Vote 2026</title>
+
+  <!-- LINE LIFF SDK -->
+  <script src="https://static.line-scdn.net/liff/edge/versions/2.22.3/sdk.js"></script>
+
+  <style>
+    /* ── Reset & Base ── */
+    *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+    :root {
+      --green-dark:   #1a472a;
+      --green-mid:    #2d6a4f;
+      --green-light:  #52b788;
+      --gold:         #ffd700;
+      --gold-dark:    #b8860b;
+      --white:        #ffffff;
+      --card-bg:      rgba(255,255,255,0.09);
+      --card-border:  rgba(255,255,255,0.15);
+      --radius:       16px;
+    }
+
+    body {
+      font-family: 'Segoe UI', 'Helvetica Neue', Arial, sans-serif;
+      background: linear-gradient(160deg, #0d2b16 0%, #1a472a 50%, #1e5631 100%);
+      min-height: 100vh;
+      color: var(--white);
+      -webkit-font-smoothing: antialiased;
+    }
+
+    /* ── Header ── */
+    .header {
+      background: rgba(0,0,0,0.35);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      padding: 14px 16px 12px;
+      text-align: center;
+      position: sticky;
+      top: 0;
+      z-index: 20;
+      border-bottom: 1px solid rgba(255,255,255,0.08);
+    }
+    .header-title {
+      font-size: 18px;
+      font-weight: 700;
+      letter-spacing: 0.5px;
+    }
+    .header-sub {
+      font-size: 11px;
+      opacity: 0.6;
+      margin-top: 2px;
+    }
+
+    /* ── User Card ── */
+    .user-card {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      margin: 14px 14px 0;
+      padding: 12px 14px;
+      border-radius: var(--radius);
+    }
+    .user-avatar {
+      width: 44px;
+      height: 44px;
+      border-radius: 50%;
+      object-fit: cover;
+      border: 2px solid var(--green-light);
+      flex-shrink: 0;
+    }
+    .user-name  { font-size: 15px; font-weight: 700; }
+    .user-hint  { font-size: 11px; opacity: 0.6; margin-top: 2px; }
+
+    /* ── Section Label ── */
+    .section-label {
+      padding: 14px 16px 6px;
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: 1.2px;
+      text-transform: uppercase;
+      opacity: 0.5;
+    }
+
+    /* ── Match Card ── */
+    .match-card {
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: var(--radius);
+      margin: 8px 14px;
+      padding: 14px 12px 12px;
+      transition: border-color 0.2s;
+    }
+    .match-card.has-vote {
+      border-color: rgba(255,215,0,0.35);
+    }
+    .match-card.inactive {
+      opacity: 0.45;
+    }
+
+    .match-meta {
+      text-align: center;
+      font-size: 10px;
+      font-weight: 600;
+      letter-spacing: 0.8px;
+      opacity: 0.55;
+      margin-bottom: 10px;
+      text-transform: uppercase;
+    }
+
+    /* ── Team Buttons ── */
+    .teams-row {
+      display: flex;
+      align-items: stretch;
+      gap: 8px;
+    }
+
+    .team-btn {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 5px;
+      padding: 14px 6px;
+      border: 2px solid rgba(255,255,255,0.22);
+      border-radius: 12px;
+      background: rgba(255,255,255,0.06);
+      color: var(--white);
+      font-family: inherit;
+      cursor: pointer;
+      transition: all 0.18s ease;
+      -webkit-tap-highlight-color: transparent;
+      position: relative;
+      overflow: hidden;
+    }
+    .team-btn:active:not(:disabled) {
+      transform: scale(0.96);
+    }
+    .team-btn:disabled {
+      cursor: not-allowed;
+    }
+    .team-btn.voted {
+      background: linear-gradient(135deg, #c8a600, #ffd700);
+      border-color: var(--gold);
+      color: #1a2a00;
+    }
+    .team-btn.voted .team-name {
+      font-weight: 800;
+    }
+    .team-btn.other-voted {
+      opacity: 0.5;
+    }
+
+    .team-flag { font-size: 32px; line-height: 1; }
+    .team-name { font-size: 13px; font-weight: 600; }
+
+    .voted-badge {
+      position: absolute;
+      top: 5px;
+      right: 6px;
+      font-size: 13px;
+    }
+
+    .vs-divider {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-width: 28px;
+      font-size: 11px;
+      font-weight: 700;
+      opacity: 0.4;
+      flex-shrink: 0;
+    }
+
+    /* ── Vote Status Line ── */
+    .vote-hint {
+      text-align: center;
+      margin-top: 9px;
+      font-size: 11px;
+      opacity: 0.55;
+      min-height: 16px;
+    }
+    .vote-hint.voted-state {
+      color: var(--gold);
+      opacity: 1;
+      font-weight: 600;
+    }
+
+    /* ── Inactive Badge ── */
+    .locked-badge {
+      text-align: center;
+      margin-top: 10px;
+      padding: 6px;
+      background: rgba(0,0,0,0.2);
+      border-radius: 8px;
+      font-size: 11px;
+    }
+
+    /* ── Loading ── */
+    .loading-wrap {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      height: 60vh;
+      gap: 16px;
+    }
+    .spinner {
+      width: 42px;
+      height: 42px;
+      border: 3px solid rgba(255,255,255,0.25);
+      border-top-color: var(--gold);
+      border-radius: 50%;
+      animation: spin 0.75s linear infinite;
+    }
+    .loading-text { font-size: 14px; opacity: 0.7; }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* ── Error ── */
+    .error-box {
+      background: rgba(220,50,50,0.18);
+      border: 1px solid rgba(220,50,50,0.4);
+      border-radius: var(--radius);
+      margin: 20px 14px;
+      padding: 20px;
+      text-align: center;
+    }
+    .error-box h3 { font-size: 15px; margin-bottom: 6px; }
+    .error-box p  { font-size: 12px; opacity: 0.7; }
+
+    /* ── Toast ── */
+    .toast {
+      position: fixed;
+      bottom: 28px;
+      left: 50%;
+      transform: translateX(-50%) translateY(80px);
+      background: #27ae60;
+      color: white;
+      padding: 11px 22px;
+      border-radius: 28px;
+      font-size: 13px;
+      font-weight: 700;
+      z-index: 999;
+      opacity: 0;
+      transition: transform 0.28s cubic-bezier(.34,1.56,.64,1), opacity 0.28s;
+      pointer-events: none;
+      box-shadow: 0 6px 24px rgba(0,0,0,0.35);
+      white-space: nowrap;
+    }
+    .toast.show {
+      transform: translateX(-50%) translateY(0);
+      opacity: 1;
+    }
+    .toast.error { background: #e74c3c; }
+
+    /* ── Bottom Spacer ── */
+    .spacer { height: 36px; }
+  </style>
+</head>
+<body>
+
+<!-- Header -->
+<div class="header">
+  <div class="header-title">⚽ World Cup Vote 2026</div>
+  <div class="header-sub">เลือกทีมที่คุณเชียร์ · แก้ไขได้ตลอด</div>
+</div>
+
+<!-- App Mount Point -->
+<div id="app">
+  <div class="loading-wrap">
+    <div class="spinner"></div>
+    <div class="loading-text">กำลังโหลด...</div>
+  </div>
+</div>
+
+<!-- Toast Notification -->
+<div class="toast" id="toast"></div>
+
+<script>
+// ============================================================
+//  CONFIG — แก้ไข 2 ค่านี้หลัง setup เสร็จ
+// ============================================================
+const LIFF_ID = 'REPLACE_WITH_YOUR_LIFF_ID';          // เช่น 2007123456-AbCdEfGh
+const API_URL = 'REPLACE_WITH_YOUR_APPS_SCRIPT_URL';  // เช่น https://script.google.com/macros/s/xxx/exec
+// ============================================================
+
+let profile = null;   // LINE user profile
+let matches = [];     // match list
+let votes   = {};     // { matchId: teamName }
+
+// ── Init ────────────────────────────────────────────────────
+
+async function init() {
+  try {
+    await liff.init({ liffId: LIFF_ID });
+
+    if (!liff.isLoggedIn()) {
+      liff.login();
+      return;
+    }
+
+    profile = await liff.getProfile();
+    await loadData();
+    render();
+
+  } catch (err) {
+    showError('ไม่สามารถโหลดแอปได้', err.message);
+  }
+}
+
+// ── Data ────────────────────────────────────────────────────
+
+async function loadData() {
+  const url = `${API_URL}?action=getAll&userId=${encodeURIComponent(profile.userId)}`;
+  const res  = await fetch(url);
+  const data = await res.json();
+
+  if (data.error) throw new Error(data.error);
+
+  matches = data.matches || [];
+  votes   = data.votes   || {};
+}
+
+// ── Vote Action ─────────────────────────────────────────────
+
+async function vote(matchId, team) {
+  const card    = document.getElementById('card-' + matchId);
+  const buttons = card.querySelectorAll('.team-btn');
+
+  // Disable while saving
+  buttons.forEach(b => b.disabled = true);
+
+  try {
+    const params = new URLSearchParams({
+      action:      'submitVote',
+      userId:      profile.userId,
+      lineName:    profile.displayName,
+      linePicture: profile.pictureUrl || '',
+      matchId,
+      team
+    });
+
+    const res  = await fetch(`${API_URL}?${params}`);
+    const data = await res.json();
+
+    if (!data.success) throw new Error(data.error || 'บันทึกไม่สำเร็จ');
+
+    votes[matchId] = team;
+    updateCard(matchId);
+
+    showToast(data.action === 'updated' ? '🔄 เปลี่ยนโหวตเรียบร้อย!' : '🎉 โหวตสำเร็จ!');
+
+  } catch (err) {
+    buttons.forEach(b => b.disabled = false);
+    showToast('❌ ' + err.message, true);
+  }
+}
+
+// ── Render ──────────────────────────────────────────────────
+
+function render() {
+  const app = document.getElementById('app');
+  let html  = '';
+
+  // User card
+  html += `
+    <div class="user-card">
+      <img class="user-avatar"
+           src="${profile.pictureUrl || 'https://via.placeholder.com/44'}"
+           onerror="this.src='https://via.placeholder.com/44'">
+      <div>
+        <div class="user-name">${escHtml(profile.displayName)}</div>
+        <div class="user-hint">เลือกทีมได้เลย · กดซ้ำเพื่อเปลี่ยน</div>
+      </div>
+    </div>
+  `;
+
+  // Match cards
+  if (matches.length === 0) {
+    html += `<div class="error-box"><h3>ยังไม่มีนัดการแข่งขัน</h3><p>ติดต่อ admin เพื่อเพิ่มข้อมูลใน Google Sheets</p></div>`;
+  } else {
+    html += `<div class="section-label">นัดการแข่งขัน</div>`;
+    for (const m of matches) {
+      html += renderMatchCard(m);
+    }
+  }
+
+  html += '<div class="spacer"></div>';
+  app.innerHTML = html;
+}
+
+function renderMatchCard(m) {
+  const voted     = votes[m.matchId];
+  const hasVote   = !!voted;
+  const votedA    = voted === m.teamA;
+  const votedB    = voted === m.teamB;
+
+  const cardClass = !m.isActive ? 'match-card inactive'
+                  : hasVote     ? 'match-card has-vote'
+                  :               'match-card';
+
+  const btnA = `
+    <button class="team-btn ${votedA ? 'voted' : (hasVote ? 'other-voted' : '')}"
+            onclick="vote('${m.matchId}','${escAttr(m.teamA)}')"
+            ${!m.isActive ? 'disabled' : ''}>
+      ${votedA ? '<span class="voted-badge">✅</span>' : ''}
+      <span class="team-flag">${m.teamAFlag}</span>
+      <span class="team-name">${escHtml(m.teamA)}</span>
+    </button>`;
+
+  const btnB = `
+    <button class="team-btn ${votedB ? 'voted' : (hasVote ? 'other-voted' : '')}"
+            onclick="vote('${m.matchId}','${escAttr(m.teamB)}')"
+            ${!m.isActive ? 'disabled' : ''}>
+      ${votedB ? '<span class="voted-badge">✅</span>' : ''}
+      <span class="team-flag">${m.teamBFlag}</span>
+      <span class="team-name">${escHtml(m.teamB)}</span>
+    </button>`;
+
+  const hint = !m.isActive
+    ? `<div class="locked-badge">🔒 ยังไม่เปิดให้โหวต</div>`
+    : hasVote
+      ? `<div class="vote-hint voted-state">✅ คุณโหวต: ${escHtml(voted)} (กดทีมอื่นเพื่อเปลี่ยน)</div>`
+      : `<div class="vote-hint">👆 กดเลือกทีมที่คุณเชียร์</div>`;
+
+  return `
+    <div class="${cardClass}" id="card-${m.matchId}">
+      <div class="match-meta">${escHtml(m.label)} · ${escHtml(m.group)}</div>
+      <div class="teams-row">
+        ${btnA}
+        <div class="vs-divider">VS</div>
+        ${btnB}
+      </div>
+      ${hint}
+    </div>`;
+}
+
+function updateCard(matchId) {
+  const match = matches.find(m => m.matchId === matchId);
+  if (!match) return;
+
+  const card = document.getElementById('card-' + matchId);
+  if (!card) return;
+
+  card.outerHTML = renderMatchCard(match);
+}
+
+// ── Utilities ────────────────────────────────────────────────
+
+function showError(title, detail) {
+  document.getElementById('app').innerHTML = `
+    <div class="error-box">
+      <h3>⚠️ ${escHtml(title)}</h3>
+      <p>${escHtml(detail || '')}</p>
+    </div>`;
+}
+
+let toastTimer = null;
+function showToast(msg, isError = false) {
+  const el = document.getElementById('toast');
+  el.textContent = msg;
+  el.className   = 'toast' + (isError ? ' error' : '');
+  void el.offsetWidth;
+  el.classList.add('show');
+  if (toastTimer) clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => el.classList.remove('show'), 3000);
+}
+
+function escHtml(s) {
+  return String(s)
+    .replace(/&/g,'&amp;').replace(/</g,'&lt;')
+    .replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+function escAttr(s) {
+  return String(s).replace(/'/g,"\\'");
+}
+
+// ── Start ────────────────────────────────────────────────────
+init();
+</script>
+</body>
+</html>
